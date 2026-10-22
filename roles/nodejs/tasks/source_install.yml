@@ -3,8 +3,14 @@
 - name: Node.js | Make a directory that holds the nodejs binaries
   file: path=/usr/local/node state=directory mode=0755
 
-- name: Node.js | Download the nodejs source archive
-  shell: wget http://nodejs.org/dist/v$nodejs_version/node-v$nodejs_version.tar.gz chdir=/tmp creates=/tmp/node-v$nodejs_version.tar.gz
+- name: Node.js | Download the published SHA-256 checksums over HTTPS
+  get_url: url=https://nodejs.org/dist/v{{ nodejs_version }}/SHASUMS256.txt dest=/tmp/node-v{{ nodejs_version }}-SHASUMS256.txt mode=0644
+
+- name: Node.js | Download the nodejs source archive over HTTPS
+  get_url: url=https://nodejs.org/dist/v{{ nodejs_version }}/node-v{{ nodejs_version }}.tar.gz dest=/tmp/node-v{{ nodejs_version }}.tar.gz mode=0644
+
+- name: Node.js | Verify the source archive against the published SHA-256 checksum
+  shell: grep " node-v{{ nodejs_version }}.tar.gz$" /tmp/node-v{{ nodejs_version }}-SHASUMS256.txt > /tmp/node-v{{ nodejs_version }}-checksum.txt && test -s /tmp/node-v{{ nodejs_version }}-checksum.txt && cd /tmp && sha256sum -c node-v{{ nodejs_version }}-checksum.txt
 
 - name: Node.js | Set the rights of the nodejs source binary archive
   file: path=/tmp/node-v$nodejs_version.tar.gz mode=0644
