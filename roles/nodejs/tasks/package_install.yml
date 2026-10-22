@@ -1,7 +1,10 @@
 # file: roles/nodejs/tasks/install_package.yml
 
-- name: Node.js | Add the nodejs chris-lea repository
-  apt_repository: repo=ppa:chris-lea/node.js
+- name: Node.js | Download the NodeSource setup script over HTTPS
+  get_url: url=https://deb.nodesource.com/setup_{{ nodejs_version.split('.')[0] }}.x dest=/tmp/nodesource_setup.sh mode=0755
 
-- name: Node.js | Make sure nodejs is installed
-  apt: pkg=nodejs=$nodejs_version
+- name: Node.js | Configure the signed NodeSource repository
+  shell: bash /tmp/nodesource_setup.sh
+
+- name: Node.js | Install the exact Node.js package release
+  apt: pkg=nodejs={{ nodejs_version }}-1nodesource1 update_cache=yes
